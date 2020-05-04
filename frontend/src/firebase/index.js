@@ -1,11 +1,6 @@
-import firebase from "firebase";
+import FirebaseContext, { withFirebase } from "./context";
+import Firebase from "./firebase";
 
-const config = {
-  apiKey: "ADD-YOUR-DETAILS-HERE",
-  authDomain: "ADD-YOUR-DETAILS-HERE",
-  databaseURL: "ADD-YOUR-DETAILS-HERE",
-};
+export default Firebase;
 
-firebase.initializeApp(config);
-export const auth = firebase.auth;
-export const db = firebase.database();
+export { FirebaseContext, withFirebase };
