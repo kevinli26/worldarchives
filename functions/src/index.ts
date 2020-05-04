@@ -1,7 +1,10 @@
+// firebase dependencies
 const functions = require('firebase-functions') // The Cloud Functions for Firebase SDK to create Cloud Functions and setup triggers.
 const admin = require('firebase-admin') // The Firebase Admin SDK to access the Firebase Realtime Database.
 admin.initializeApp()
 const db = admin.firestore() // Reference to our firestore database
+
+// external dependencies
 const axios = require('axios').default
 const newsCredentials = '3f5ecb41c72d4ea5a059d84cc87988b9' //TO-DO: move to environment variables
 
@@ -44,6 +47,16 @@ interface groupedHeadline {
     source: minimizedHeadline[]
 }
 
+interface rawSource {
+    id: string
+    name: string
+    description: string
+    url: string
+    category: string
+    language: string
+    country: string
+}
+
 // groupBy is a helper function to group arrays by a provided key
 function groupBy(ungrouped: any[], key: string) {
     return ungrouped.reduce((grouped: any, each: any) => {
@@ -58,13 +71,29 @@ function groupBy(ungrouped: any[], key: string) {
     }, {});
 };
 
-// getHeadlines gets raw data from news api
+// getSources gets the list of sources
+async function getSources() {
+    try {
+        const raw: any = await axios.get(`https://newsapi.org/v2/sources?apiKey=${newsCredentials}`)
+        const response: any = raw.data
+        if (response.status !== 'ok') {
+            throw new Error("Error. Unexepcted response status when fetching sources")
+        } else {
+            return response.sources
+        }
+    } catch (error) {
+        console.log('Failed in getSources')
+        throw error
+    }
+}
+
+// getHeadlines gets the raw news data
 async function getHeadlines() {
     try {
         const raw: any = await axios.get(`https://newsapi.org/v2/top-headlines?country=us&apiKey=${newsCredentials}`)
         const response: any = raw.data
         if (response.status !== 'ok') {
-            throw new Error("Error. Unexepcted response status")
+            throw new Error("Error. Unexepcted response status when fetching headlines")
         } else {
             return response.articles
         }
@@ -93,6 +122,42 @@ function formatHeadlines(headlines: rawHeadline[]): groupedHeadline[] {
     return grouped
 }
 
+// formatSources filters sources and based on language and country
+function formatSources(sources: rawSource[]): string[]{
+    const formatted: rawSource[] = sources.filter(source => {
+        return source.language === 'en' && source.country === 'us'
+    })
+    const sourcesOnly: string[] = formatted.map(source => {
+        return source.name
+    })
+    return sourcesOnly
+}
+
+// TO-DO: make this into a scheduled pubsub function
+exports.getSources = functions.https.onRequest(async (req: any, res: any) => {
+    try {
+        // raw unformatted sources
+        const resp: rawSource[] = await getSources();
+
+        // only return english sources
+        const formattedResp: string[] = formatSources(resp);
+
+        // reference to the document corresponding to today
+        const docRef: any = db.collection('sources').doc('en')
+        // upsert into headlines. This will create or overrite the document
+        docRef.set({
+            sources: formattedResp,
+        })
+        console.log(`SUCCESS: updated sources`)
+    
+        // TO-DO: remove dummy direction when integrated into pubsub
+        res.redirect('https://www.google.com/')
+    } catch (error) {
+        console.log(`FAILURE: ${error.toString()}`)
+    }
+});
+
+
 // TO-DO: make this into a scheduled pubsub function
 exports.getHeadlines = functions.https.onRequest(async (req: any, res: any) => {
     try {
@@ -105,8 +170,9 @@ exports.getHeadlines = functions.https.onRequest(async (req: any, res: any) => {
         // YYYY-MM-DD document. One per day, updated hourly
         const datetime: string = new Date().toISOString().slice(0,10).toString()
 
-        // upsert into headlines
+        // reference to the document corresponding to today
         const docRef: any = db.collection('headlines').doc(datetime)
+        // upsert into headlines. This will create or overrite the document
         docRef.set({
             ...formattedResp,
         })
