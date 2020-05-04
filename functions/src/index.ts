@@ -1,11 +1,11 @@
 // The Cloud Functions for Firebase SDK to create Cloud Functions and setup triggers.
 const functions = require('firebase-functions');
-
 // The Firebase Admin SDK to access the Firebase Realtime Database.
 const admin = require('firebase-admin');
 admin.initializeApp();
 
 const axios = require('axios').default
+//TO-DO: move to environment variables
 const newsCredentials = '3f5ecb41c72d4ea5a059d84cc87988b9'
 
 interface Source {
@@ -60,17 +60,12 @@ function formatHeadlines(headlines: rawHeadline[]): formattedHeadline[] {
     return formatted
 }
 
-// Take the text parameter passed to this HTTP endpoint and insert it into the
-// Realtime Database under the path /messages/:pushId/original
 exports.addMessage = functions.https.onRequest(async (req: any, res: any) => {
   const resp: rawHeadline[] = await getHeadlines();
-  console.log(resp)
-
   const formattedResp: formattedHeadline[] = formatHeadlines(resp);
-  console.log(formattedResp)
 
   // Push the new message into the Realtime Database using the Firebase Admin SDK.
-  const snapshot = await admin.database().ref('/messages').push({original: formattedResp});
+  const snapshot = await admin.database().ref('/messages').push({headlines: formattedResp});
   // Redirect with 303 SEE OTHER to the URL of the pushed object in the Firebase console.
   res.redirect(303, snapshot.ref.toString());
 });
