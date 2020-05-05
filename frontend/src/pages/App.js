@@ -20,6 +20,9 @@ const mapStateToProps = (state) => {
 class App extends Component {
   constructor(props) {
     super(props);
+    this.state = {
+      selectedSources: [],
+    };
     // this.props.firebase.getAllSources();
   }
 
@@ -58,6 +61,33 @@ class App extends Component {
             endDate={this.props.endDate}
             calKey={this.props.calKey}
           />
+          <div
+            style={{
+              maxWidth: "30vw",
+            }}
+          >
+            <CheckboxGroup
+              name="fruits"
+              value={this.state.sources}
+              onChange={this.setState}
+            >
+              {(Checkbox) => (
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    maxHeight: "30vh",
+                  }}
+                >
+                  {this.props.sources.map((name) => (
+                    <label style={{}}>
+                      <Checkbox value={name} /> {name}
+                    </label>
+                  ))}
+                </div>
+              )}
+            </CheckboxGroup>
+          </div>
         </div>
         <Button
           startDate={this.props.startDate}
