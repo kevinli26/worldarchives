@@ -29,6 +29,7 @@ interface formattedHeadline {
     source: string
     author: string
     title: string
+    description: string
     urlToImage: string
     publishedAt: string
     content: string
@@ -57,15 +58,15 @@ interface rawSource {
     country: string
 }
 
-// groupBy is a helper function to group arrays by a provided key
-function groupBy(ungrouped: any[], key: string) {
+// groupHeadlines is a helper function to group arrays by a provided key
+function groupHeadlines(ungrouped: formattedHeadline[], key: string) {
     return ungrouped.reduce((grouped: any, each: any) => {
         (grouped[each[key]] = grouped[each[key]] || []).push({
             author: each.author || 'Anonymous', // if author is null, set as anonymous
             title: each.title,
             urlToImage: each.urlToImage,
             publishedAt: each.publishedAt,
-            content: each.content,
+            content: each.content || each.description || "Not Available",
         });
         return grouped;
     }, {});
@@ -74,7 +75,7 @@ function groupBy(ungrouped: any[], key: string) {
 // getSources gets the list of sources
 async function getSources() {
     try {
-        const raw: any = await axios.get(`https://newsapi.org/v2/sources?apiKey=${newsCredentials}`)
+        const raw: any = await axios.get(`https://newsapi.org/v2/sources?language=en&country=us&apiKey=${newsCredentials}`)
         const response: any = raw.data
         if (response.status !== 'ok') {
             throw new Error("Error. Unexepcted response status when fetching sources")
@@ -110,24 +111,22 @@ function formatHeadlines(headlines: rawHeadline[]): groupedHeadline[] {
             source: headline.source.name, // format source to get string description
             author: headline.author,
             title: headline.title,
+            description: headline.description, // to be used for content if it is unavailable
             urlToImage: headline.urlToImage,
             publishedAt: headline.publishedAt,
             content: headline.content,
         }
     })
 
-    // group data by source
-    const grouped: groupedHeadline[] = groupBy(formatted, 'source')
+    // group headlines by source
+    const grouped: groupedHeadline[] = groupHeadlines(formatted, 'source')
     
     return grouped
 }
 
 // formatSources filters sources and based on language and country
 function formatSources(sources: rawSource[]): string[]{
-    const formatted: rawSource[] = sources.filter(source => {
-        return source.language === 'en' && source.country === 'us'
-    })
-    const sourcesOnly: string[] = formatted.map(source => {
+    const sourcesOnly: string[] = sources.map(source => {
         return source.name
     })
     return sourcesOnly
@@ -139,7 +138,7 @@ exports.getSources = functions.https.onRequest(async (req: any, res: any) => {
         // raw unformatted sources
         const resp: rawSource[] = await getSources();
 
-        // only return english sources
+        // only return english sources in the us
         const formattedResp: string[] = formatSources(resp);
 
         // reference to the document corresponding to today
