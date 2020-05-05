@@ -132,7 +132,7 @@ function formatSources(sources: rawSource[]): string[]{
     return sourcesOnly
 }
 
-// TO-DO: make this into a scheduled pubsub function
+// manual refresh method for news sources
 exports.getSources = functions.https.onRequest(async (req: any, res: any) => {
     try {
         // raw unformatted sources
@@ -149,7 +149,7 @@ exports.getSources = functions.https.onRequest(async (req: any, res: any) => {
         })
         console.log(`SUCCESS: updated sources`)
     
-        // TO-DO: remove dummy direction when integrated into pubsub
+        // TO-DO: remove dummy direction
         res.redirect('https://www.google.com/')
     } catch (error) {
         console.log(`FAILURE: ${error.toString()}`)
@@ -157,7 +157,7 @@ exports.getSources = functions.https.onRequest(async (req: any, res: any) => {
 });
 
 
-// TO-DO: make this into a scheduled pubsub function
+// manual refresh method for news headlines
 exports.getHeadlines = functions.https.onRequest(async (req: any, res: any) => {
     try {
         // raw unformatted headlines
@@ -177,15 +177,36 @@ exports.getHeadlines = functions.https.onRequest(async (req: any, res: any) => {
         })
         console.log(`SUCCESS: upserted records for ${datetime}`)
     
-        // TO-DO: remove dummy direction when integrated into pubsub
+        // TO-DO: remove dummy direction
         res.redirect('https://www.google.com/')
     } catch (error) {
         console.log(`FAILURE: ${error.toString()}`)
     }
 });
 
-exports.scheduledFunction = functions.pubsub.schedule('every 60 minutes').onRun( async (context: any) => {
-    console.log('This will be run every 60 minutes');
+// scheduled pubsub job for refreshing news headlines
+exports.scheduledDataRefresh = functions.pubsub.schedule('every 60 minutes').onRun( async (context: any) => {
+    console.log('Refresh news sources first')
+    try {
+        // raw unformatted sources
+        const resp: rawSource[] = await getSources();
+
+        // only return english sources in the us
+        const formattedResp: string[] = formatSources(resp);
+
+        // reference to the document corresponding to today
+        const docRef: any = db.collection('sources').doc('en')
+        // upsert into headlines. This will create or overrite the document
+        docRef.set({
+            sources: formattedResp,
+        })
+        console.log(`SUCCESS: updated sources`)
+    } catch (error) {
+        console.log(`FAILURE: ${error.toString()}`)
+        return null // exit on error
+    }
+
+    console.log('Then refresh headlines')
     try {
         // raw unformatted headlines
         const resp: rawHeadline[] = await getHeadlines();
@@ -205,6 +226,8 @@ exports.scheduledFunction = functions.pubsub.schedule('every 60 minutes').onRun(
         console.log(`SUCCESS: Scheduled upsertion succeeded for ${datetime}`)
     } catch (error) {
         console.log(`FAILURE: Scheduled upsertion failed with error code ${error.toString()}`)
+        return null // exit on error
     }
-    return null;
+
+    return null // exit on success
 });
