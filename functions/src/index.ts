@@ -6,7 +6,8 @@ const db = admin.firestore() // Reference to our firestore database
 
 // external dependencies
 const axios = require('axios').default
-const newsCredentials = '3f5ecb41c72d4ea5a059d84cc87988b9' //TO-DO: move to environment variables
+const newsCredentials = '3f5ecb41c72d4ea5a059d84cc87988b9' //TO-DO: move to environment variables in firebase
+axios.defaults.headers.get['X-Api-Key'] = newsCredentials // for all GET requests
 
 // interfaces to strictly type data transformation process
 interface Source {
@@ -75,7 +76,12 @@ function groupHeadlines(ungrouped: formattedHeadline[], key: string) {
 // getSources gets the list of sources
 async function getSources() {
     try {
-        const raw: any = await axios.get(`https://newsapi.org/v2/sources?language=en&country=us&apiKey=${newsCredentials}`)
+        const raw: any = await axios.get('https://newsapi.org/v2/sources', {
+            params: {
+                language: 'en',
+                country: 'us',
+            }
+        })
         const response: any = raw.data
         if (response.status !== 'ok') {
             throw new Error("Error. Unexepcted response status when fetching sources")
@@ -91,7 +97,11 @@ async function getSources() {
 // getHeadlines gets the raw news data
 async function getHeadlines() {
     try {
-        const raw: any = await axios.get(`https://newsapi.org/v2/top-headlines?country=us&apiKey=${newsCredentials}`)
+        const raw: any = await axios.get('https://newsapi.org/v2/top-headlines', {
+            params: {
+                country: 'us',
+            }
+        })
         const response: any = raw.data
         if (response.status !== 'ok') {
             throw new Error("Error. Unexepcted response status when fetching headlines")
@@ -147,10 +157,9 @@ exports.getSources = functions.https.onRequest(async (req: any, res: any) => {
         docRef.set({
             sources: formattedResp,
         })
+        
         console.log(`SUCCESS: updated sources`)
-    
-        // TO-DO: remove dummy direction
-        res.redirect('https://www.google.com/')
+        res.end()
     } catch (error) {
         console.log(`FAILURE: ${error.toString()}`)
     }
@@ -175,10 +184,9 @@ exports.getHeadlines = functions.https.onRequest(async (req: any, res: any) => {
         docRef.set({
             ...formattedResp,
         })
+
         console.log(`SUCCESS: upserted records for ${datetime}`)
-    
-        // TO-DO: remove dummy direction
-        res.redirect('https://www.google.com/')
+        res.end()
     } catch (error) {
         console.log(`FAILURE: ${error.toString()}`)
     }
@@ -200,6 +208,7 @@ exports.scheduledDataRefresh = functions.pubsub.schedule('every 60 minutes').onR
         docRef.set({
             sources: formattedResp,
         })
+
         console.log(`SUCCESS: updated sources`)
     } catch (error) {
         console.log(`FAILURE: ${error.toString()}`)
@@ -223,6 +232,7 @@ exports.scheduledDataRefresh = functions.pubsub.schedule('every 60 minutes').onR
         docRef.set({
             ...formattedResp,
         })
+
         console.log(`SUCCESS: Scheduled upsertion succeeded for ${datetime}`)
     } catch (error) {
         console.log(`FAILURE: Scheduled upsertion failed with error code ${error.toString()}`)
