@@ -67,6 +67,9 @@ functions/node_modules/
 # Typescript v1 declaration files
 functions/typings/
 
-## Compiled JavaScript files
+# Compiled JavaScript files
 functions/**/*.js
 functions/**/*.js.map
+
+# local folder settings
+.DS_Store
