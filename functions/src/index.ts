@@ -183,3 +183,28 @@ exports.getHeadlines = functions.https.onRequest(async (req: any, res: any) => {
         console.log(`FAILURE: ${error.toString()}`)
     }
 });
+
+exports.scheduledFunction = functions.pubsub.schedule('every 60 minutes').onRun( async (context: any) => {
+    console.log('This will be run every 60 minutes');
+    try {
+        // raw unformatted headlines
+        const resp: rawHeadline[] = await getHeadlines();
+
+        // minimized and aggregated headlines, grouped by source
+        const formattedResp: groupedHeadline[] = formatHeadlines(resp);
+
+        // YYYY-MM-DD document. One per day, updated hourly
+        const datetime: string = new Date().toISOString().slice(0,10).toString()
+
+        // reference to the document corresponding to today
+        const docRef: any = db.collection('headlines').doc(datetime)
+        // upsert into headlines. This will create or overrite the document
+        docRef.set({
+            ...formattedResp,
+        })
+        console.log(`SUCCESS: Scheduled upsertion succeeded for ${datetime}`)
+    } catch (error) {
+        console.log(`FAILURE: Scheduled upsertion failed with error code ${error.toString()}`)
+    }
+    return null;
+});
