@@ -6,8 +6,7 @@ const db = admin.firestore() // Reference to our firestore database
 
 // external dependencies
 const axios = require('axios').default
-const newsCredentials = '3f5ecb41c72d4ea5a059d84cc87988b9' //TO-DO: move to environment variables in firebase
-axios.defaults.headers.get['X-Api-Key'] = newsCredentials // for all GET requests
+axios.defaults.headers.get['X-Api-Key'] = functions.config().newsapi.key // set api key in header for all for all GET requests
 
 // interfaces to strictly type data transformation process
 interface Source {
@@ -151,13 +150,14 @@ exports.getSources = functions.https.onRequest(async (req: any, res: any) => {
         // only return english sources in the us
         const formattedResp: string[] = formatSources(resp);
 
-        // reference to the document corresponding to today
+        // only have one document that keeps track of the sources
         const docRef: any = db.collection('sources').doc('en')
+
         // upsert into headlines. This will create or overrite the document
         docRef.set({
             sources: formattedResp,
         })
-        
+
         console.log(`SUCCESS: updated sources`)
         res.end()
     } catch (error) {
@@ -180,6 +180,7 @@ exports.getHeadlines = functions.https.onRequest(async (req: any, res: any) => {
 
         // reference to the document corresponding to today
         const docRef: any = db.collection('headlines').doc(datetime)
+
         // upsert into headlines. This will create or overrite the document
         docRef.set({
             ...formattedResp,
@@ -202,8 +203,9 @@ exports.scheduledDataRefresh = functions.pubsub.schedule('every 60 minutes').onR
         // only return english sources in the us
         const formattedResp: string[] = formatSources(resp);
 
-        // reference to the document corresponding to today
+        // only have one document that keeps track of the sources
         const docRef: any = db.collection('sources').doc('en')
+
         // upsert into headlines. This will create or overrite the document
         docRef.set({
             sources: formattedResp,
@@ -228,6 +230,7 @@ exports.scheduledDataRefresh = functions.pubsub.schedule('every 60 minutes').onR
 
         // reference to the document corresponding to today
         const docRef: any = db.collection('headlines').doc(datetime)
+
         // upsert into headlines. This will create or overrite the document
         docRef.set({
             ...formattedResp,
