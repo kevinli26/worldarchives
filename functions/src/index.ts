@@ -158,10 +158,10 @@ exports.getSources = functions.https.onRequest(async (req: any, res: any) => {
             sources: formattedResp,
         })
 
-        console.log(`SUCCESS: updated sources`)
+        console.log(`SUCCESS: Manual sources update succeeded`)
         res.end()
     } catch (error) {
-        console.log(`FAILURE: ${error.toString()}`)
+        console.log(`FAILURE: Manual sources update failed with error: ${error.toString()}`)
     }
 });
 
@@ -186,10 +186,10 @@ exports.getHeadlines = functions.https.onRequest(async (req: any, res: any) => {
             ...formattedResp,
         })
 
-        console.log(`SUCCESS: upserted records for ${datetime}`)
+        console.log(`SUCCESS: Manual headlines update succeeded for ${datetime}`)
         res.end()
     } catch (error) {
-        console.log(`FAILURE: ${error.toString()}`)
+        console.log(`FAILURE: Manual headlines update failed with error: ${error.toString()}`)
     }
 });
 
@@ -211,9 +211,9 @@ exports.scheduledDataRefresh = functions.pubsub.schedule('every 60 minutes').onR
             sources: formattedResp,
         })
 
-        console.log(`SUCCESS: updated sources`)
+        console.log(`SUCCESS: Scheduled sources update succeeded`)
     } catch (error) {
-        console.log(`FAILURE: ${error.toString()}`)
+        console.log(`FAILURE: Scheduled sources update failed with error: ${error.toString()}`)
         return null // exit on error
     }
 
@@ -236,11 +236,43 @@ exports.scheduledDataRefresh = functions.pubsub.schedule('every 60 minutes').onR
             ...formattedResp,
         })
 
-        console.log(`SUCCESS: Scheduled upsertion succeeded for ${datetime}`)
+        console.log(`SUCCESS: Scheduled headlines update succeeded for ${datetime}`)
     } catch (error) {
-        console.log(`FAILURE: Scheduled upsertion failed with error code ${error.toString()}`)
+        console.log(`FAILURE: Scheduled headlines update failed with error: ${error.toString()}`)
         return null // exit on error
     }
 
     return null // exit on success
+});
+
+// manual refresh method for news headlines
+exports.getHeadlinesDate = functions.https.onRequest(async (req: any, res: any) => {
+    try {
+        // get passed in date from request
+        let documentDate: string = req.query.date;
+
+        // if no date is passed in from the request, use the current day as the parameter
+        if (documentDate.length === 0) {
+            documentDate = new Date().toISOString().slice(0,10).toString()
+        }
+
+        // raw unformatted headlines
+        const resp: rawHeadline[] = await getHeadlines();
+
+        // minimized and aggregated headlines, grouped by source
+        const formattedResp: groupedHeadline[] = formatHeadlines(resp);
+
+        // reference to the document corresponding to today
+        const docRef: any = db.collection('headlines').doc(documentDate)
+
+        // upsert into headlines. This will create or overrite the document
+        docRef.set({
+            ...formattedResp,
+        })
+
+        console.log(`SUCCESS: Manual headlines date update succeeded for ${documentDate}`)
+        res.end()
+    } catch (error) {
+        console.log(`FAILURE: Manual headlines date update failed with error: ${error.toString()}`)
+    }
 });
