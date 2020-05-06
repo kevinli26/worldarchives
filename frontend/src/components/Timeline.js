@@ -4,12 +4,13 @@ import {
   VerticalTimelineElement,
 } from "react-vertical-timeline-component";
 import "react-vertical-timeline-component/style.min.css";
+import moment from "moment";
 
 function Timeline({ articles }) {
   return (
     <div
       style={{
-        backgroundColor: "grey",
+        backgroundColor: "#457B9D",
         width: "100vw",
         height: "auto",
       }}
@@ -19,20 +20,32 @@ function Timeline({ articles }) {
           return (
             <VerticalTimelineElement
               className="vertical-timeline-element--work"
-              contentStyle={{ background: "rgb(33, 150, 243)", color: "#fff" }}
+              contentStyle={{ background: "#1D3557", color: "#fff" }}
               contentArrowStyle={{
-                borderRight: "7px solid  rgb(33, 150, 243)",
+                borderRight: "7px solid  #1D3557",
               }}
-              date={article.publishedAt}
-              iconStyle={{ background: "rgb(33, 150, 243)", color: "#fff" }}
+              date={moment(article.publishedAt).format(
+                "dddd, MMMM Do YYYY, h:mm:ss a"
+              )}
+              iconStyle={{ background: "#1D3557", color: "#fff" }}
             >
-              <h3 className="vertical-timeline-element-title">
+              <h3
+                style={{
+                  color: "#E63946",
+                }}
+                className="vertical-timeline-element-title"
+              >
                 {article.title}
               </h3>
               <h4 className="vertical-timeline-element-subtitle">
                 {article.author}
               </h4>
-              <img width="200px" height="200px" src={article.urlToImage} />
+              <img
+                style={{ float: "center" }}
+                width="200px"
+                height="200px"
+                src={article.urlToImage}
+              />
               <p>{article.content}</p>
             </VerticalTimelineElement>
           );

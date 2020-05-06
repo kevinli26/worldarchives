@@ -29,7 +29,11 @@ const Calendar = (props) => {
   );
 
   return (
-    <div>
+    <div
+      style={{
+        flex: "1",
+      }}
+    >
       <DateRangePicker
         onChange={(item) => {
           props.dispatch(setStartDate(item.selection.startDate));

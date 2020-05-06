@@ -13,7 +13,13 @@ const Loader = () => {
         height: "95vh",
       }}
     >
-      <div class="lds-dual-ring"></div>
+      <div
+        class="lds-dual-ring"
+        style={{
+          marginBottom: "90px",
+        }}
+      />
+      {/* Loading ... */}
     </div>
   );
 };
