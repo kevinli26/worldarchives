@@ -11,7 +11,7 @@ function Timeline({ articles }) {
     <div
       style={{
         backgroundColor: "#457B9D",
-        width: "100vw",
+        width: "auto",
         height: "auto",
       }}
     >

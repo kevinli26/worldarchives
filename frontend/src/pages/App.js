@@ -7,7 +7,7 @@ import {
 } from "react-router-dom";
 import NewsArchiver from "./NewsArchiver";
 import { withFirebase } from "../firebase/index";
-import Login from "../components/Login";
+import Login from "./Login";
 import { connect } from "react-redux";
 import Landing from "../components/Landing";
 

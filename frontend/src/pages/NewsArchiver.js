@@ -1,5 +1,5 @@
 import React, { useState, Component, useEffect } from "react";
-import "../css/App.css";
+import "../css/NewsArchiver.css";
 import { connect } from "react-redux";
 import Calendar from "../components/Calendar";
 import Button from "../components/Button";
@@ -85,11 +85,7 @@ function NewsArchiver(props) {
   }
 
   return (
-    <div
-      style={{
-        overflowY: "hidden",
-      }}
-    >
+    <div>
       {loading ? (
         <Loader />
       ) : selecting ? (
@@ -100,7 +96,9 @@ function NewsArchiver(props) {
             justifyContent: "center",
             alignItems: "center",
             width: "100vw",
-            height: "95vh",
+            height: "100vh",
+            background: "#457B9D",
+            overflowX: "hidden",
           }}
         >
           <div
