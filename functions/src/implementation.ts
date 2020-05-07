@@ -39,7 +39,7 @@ export async function refreshHeadlinesHelper(date?: string) {
         const resp: interfaces.rawHeadline[] = await helpers.getHeadlines()
 
         // minimized headlines with applied NLP
-        const formattedResp: interfaces.analyzedHeadline[] = helpers.analyzeHeadlines(resp)
+        const formattedResp: interfaces.analyzedHeadline[] = await helpers.analyzeHeadlines(resp)
 
         // group headlines by source
         const grouped: interfaces.groupedHeadline[] = helpers.groupHeadlines(formattedResp, 'source')

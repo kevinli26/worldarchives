@@ -4,29 +4,28 @@ import * as functions from 'firebase-functions' // The Cloud Functions for Fireb
 // external dependencies
 const axios = require('axios').default
 axios.defaults.headers.get['X-Api-Key'] = functions.config().newsapi.key // set api key in header for all for all GET requests
+const language = require('@google-cloud/language') // Imports the Google Cloud client library for NLP
+const client = new language.LanguageServiceClient() // activates the client to provide an interface
 
 // import local files
 import * as interfaces from './interfaces'
 
-// Imports the Google Cloud client library for NLP
-const language = require('@google-cloud/language')
-const client = new language.LanguageServiceClient()
 
 
 // implements the functionality of the NLP sentiment analysis
 async function sentimentAnalysis(text: string) {
-    // Prepares a document, representing the provided text
+    // prepare a document to analyze
     const document = {
        content: text,
        type: 'PLAIN_TEXT',
-   };
+    }
 
-   // Detects the sentiment of the document
+   // Analyzes and stores the sentiment of the document
    const [result] = await client.analyzeSentiment({document})
 
    const sentiment: any = result.documentSentiment
-   console.log(`Sentiment Score: ${sentiment.score}`)
-   console.log(`Sentiment Magnitude: ${sentiment.magnitude}`)
+//    console.log(`Sentiment Score: ${sentiment.score}`)
+//    console.log(`Sentiment Magnitude: ${sentiment.magnitude}`)
 
    return sentiment
 }
@@ -90,8 +89,9 @@ export async function getHeadlines() {
 }
 
 // analyze headlines filters and aggregates rawData into a storeable format, then runs NLP apis on it
-export function analyzeHeadlines(headlines: interfaces.rawHeadline[]): interfaces.analyzedHeadline[] {
-    const formatted: interfaces.analyzedHeadline[] = headlines.map(headline => {
+export async function analyzeHeadlines(headlines: interfaces.rawHeadline[]) {
+    const formatted: interfaces.analyzedHeadline[] = await Promise.all(headlines.map(async headline => {
+        const sentimentResult: any = await sentimentAnalysis(headline.content)
         return {
             source: headline.source.name, // format source to get string description
             author: headline.author,
@@ -100,10 +100,10 @@ export function analyzeHeadlines(headlines: interfaces.rawHeadline[]): interface
             urlToImage: headline.urlToImage,
             publishedAt: headline.publishedAt,
             content: headline.content,
-            sentimentScore: 10,
-            sentimentMagnitude: 10,
+            sentimentScore: sentimentResult.score,
+            sentimentMagnitude: sentimentResult.magnitude,
         }
-    })
+    }))
     return formatted
 }
 
