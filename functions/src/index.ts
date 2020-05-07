@@ -10,10 +10,10 @@ import * as helpers from './helpers'
 
 
 // Imports the Google Cloud client library
-import * as language from '@google-cloud/language'
+const language = require('@google-cloud/language')
 
 // Creates a client
-const client = new language.LanguageServiceClient();
+const client = new language.LanguageServiceClient()
 
 exports.testSentimentAnalysis = functions.https.onRequest(async (req: any, res: any) => {
     const text = 'CHICAGO (WLS) -- There are cases in Chicago of a mysterious illness impacting children that may be connected to COVID-19. The symptoms are very similar to toxic shock syndrome or Kawasaki disease, a rare sickness that involves inflammation of blood vessels.'
@@ -25,19 +25,19 @@ exports.testSentimentAnalysis = functions.https.onRequest(async (req: any, res: 
     };
 
     // Detects the sentiment of the document
-    const [result] = await client.analyzeSentiment({document});
+    const [result] = await client.analyzeSentiment({document})
 
-    const sentiment = result.documentSentiment;
-    console.log('Document sentiment:');
-    console.log(`  Score: ${sentiment.score}`);
-    console.log(`  Magnitude: ${sentiment.magnitude}`);
+    const sentiment = result.documentSentiment
+    console.log('Document sentiment:')
+    console.log(`  Score: ${sentiment.score}`)
+    console.log(`  Magnitude: ${sentiment.magnitude}`)
 
-    const sentences = result.sentences;
+    const sentences = result.sentences
     sentences.forEach( (sentence: any) => {
-        console.log(`Sentence: ${sentence.text.content}`);
-        console.log(`  Score: ${sentence.sentiment.score}`);
-        console.log(`  Magnitude: ${sentence.sentiment.magnitude}`);
-    });
+        console.log(`Sentence: ${sentence.text.content}`)
+        console.log(`  Score: ${sentence.sentiment.score}`)
+        console.log(`  Magnitude: ${sentence.sentiment.magnitude}`)
+    })
 
     res.end()
 })
@@ -99,7 +99,7 @@ exports.refreshSources = functions.https.onRequest(async (req: any, res: any) =>
         console.error(`FAILURE: Manual sources update failed with error: ${error.toString()}`)
         res.end()
     }
-});
+})
 
 // manual refresh method for news headlines
 exports.refreshHeadlines = functions.https.onRequest(async (req: any, res: any) => {
@@ -111,7 +111,7 @@ exports.refreshHeadlines = functions.https.onRequest(async (req: any, res: any) 
         console.error(`FAILURE: Manual headlines update failed with error: ${error.toString()}`)
         res.end()
     }
-});
+})
 
 // scheduled pubsub job for refreshing news headlines
 exports.scheduledDataRefresh = functions.pubsub.schedule('every 60 minutes').onRun( async (context: any) => {
@@ -134,7 +134,7 @@ exports.scheduledDataRefresh = functions.pubsub.schedule('every 60 minutes').onR
     }
 
     return null // exit on success
-});
+})
 
 // manual refresh method for news headlines, cannot use the helper as the functionality differs
 exports.refreshHeadlinesWithDate = functions.https.onRequest(async (req: any, res: any) => {
@@ -167,4 +167,4 @@ exports.refreshHeadlinesWithDate = functions.https.onRequest(async (req: any, re
         console.error(`FAILURE: Manual headlines date update failed with error: ${error.toString()}`)
         res.end()
     }
-});
+})
