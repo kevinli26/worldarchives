@@ -10,7 +10,7 @@ import * as helpers from './helpers'
 
 
 // Imports the Google Cloud client library
-const language = require('@google-cloud/language');
+import * as language from '@google-cloud/language'
 
 // Creates a client
 const client = new language.LanguageServiceClient();
