@@ -59,7 +59,7 @@ async function refreshSourcesHelper() {
             sources: formattedResp,
         })
     } catch (error) {
-        console.log('failed in refreshSourcesHelper')
+        console.error('failed in refreshSourcesHelper')
         throw error
     }
 }
@@ -133,7 +133,7 @@ exports.scheduledDataRefresh = functions.pubsub.schedule('every 60 minutes').onR
         return null // exit on error
     }
 
-    return null // exit on success
+    return null // exit on success of both sources and headlines refresh
 })
 
 // manual refresh method for news headlines, cannot use the helper as the functionality differs
