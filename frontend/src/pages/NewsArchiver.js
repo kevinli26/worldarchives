@@ -1,6 +1,5 @@
 import React, { useState, Component, useEffect } from "react";
 import "../css/App.css";
-import { withFirebase } from "../firebase/index";
 import { connect } from "react-redux";
 import Calendar from "../components/Calendar";
 import Button from "../components/Button";
@@ -11,13 +10,14 @@ import { isThisWeek, addDays } from "date-fns";
 import { firestore } from "firebase";
 import Timeline from "../components/Timeline";
 
-const mapStateToProps = (state) => {
+const mapStateToProps = (state, ownProps) => {
   return {
     startDate: state.startDate,
     endDate: state.endDate,
     calKey: state.calKey,
     articles: state.articles,
     sources: state.sources,
+    firebase: ownProps.firebase,
   };
 };
 
@@ -27,19 +27,20 @@ function NewsArchiver(props) {
   const [selecting, setSelecting] = useState(true);
 
   useEffect(() => {
-    async function fetchSources() {
-      const doc = await props.firebase.db.collection("sources").doc("en").get();
-      if (doc.exists) {
-        props.dispatch(setSources(doc.data().sources));
-        setLoading(false);
+    if (props.firebase != null) {
+      async function fetchSources() {
+        const doc = await props.firebase.db
+          .collection("sources")
+          .doc("en")
+          .get();
+        if (doc.exists) {
+          props.dispatch(setSources(doc.data().sources));
+          setLoading(false);
+        }
       }
+      fetchSources();
     }
-    fetchSources();
   }, [props.firebase]);
-
-  useEffect(() => {
-    console.log(props.articles);
-  }, [props.articles]);
 
   function timeout(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));
@@ -160,4 +161,4 @@ function NewsArchiver(props) {
   );
 }
 
-export default connect(mapStateToProps)(withFirebase(NewsArchiver));
+export default connect(mapStateToProps)(NewsArchiver);

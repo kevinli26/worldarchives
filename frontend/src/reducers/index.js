@@ -4,6 +4,7 @@ import {
   SET_END_DATE,
   SET_SOURCES,
   SET_SELECTED_SOURCES,
+  SET_AUTHENTICATED,
 } from "../constants/action-types";
 
 const initialState = {
@@ -13,6 +14,7 @@ const initialState = {
   articles: [],
   sources: [],
   selectedSources: [],
+  isAuthenticated: false,
 };
 
 function rootReducer(state = initialState, action) {
@@ -37,6 +39,11 @@ function rootReducer(state = initialState, action) {
       sources: action.payload,
     };
   } else if (action.type === SET_SELECTED_SOURCES) {
+  } else if (action.type === SET_AUTHENTICATED) {
+    return {
+      ...state,
+      isAuthenticated: action.payload,
+    };
   }
   return state;
 }

@@ -4,6 +4,7 @@ import {
   SET_END_DATE,
   SET_SOURCES,
   SET_SELECTED_SOURCES,
+  SET_AUTHENTICATED,
 } from "../constants/action-types";
 
 export function addArticle(payload) {
@@ -24,4 +25,8 @@ export function setSources(payload) {
 
 export function setSelectedSources(payload) {
   return { type: SET_SELECTED_SOURCES, payload };
+}
+
+export function setAuthenticated(payload) {
+  return { type: SET_AUTHENTICATED, payload };
 }
