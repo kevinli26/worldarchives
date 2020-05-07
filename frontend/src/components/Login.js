@@ -24,9 +24,16 @@ const Login = (props) => {
     },
   };
   return (
-    <div>
-      <h1>My App</h1>
-      <p>Please sign-in:</p>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+        alignItems: "center",
+        width: "100vw",
+        height: "100vh",
+      }}
+    >
       <StyledFirebaseAuth
         uiConfig={uiConfig}
         firebaseAuth={props.firebaseInstance.auth}
