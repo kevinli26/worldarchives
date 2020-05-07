@@ -23,16 +23,8 @@ export async function sentimentAnalysis(text: string) {
    const [result] = await client.analyzeSentiment({document})
 
    const sentiment: any = result.documentSentiment
-   console.log('Document sentiment:')
-   console.log(`  Score: ${sentiment.score}`)
-   console.log(`  Magnitude: ${sentiment.magnitude}`)
-
-   const sentences = result.sentences
-   sentences.forEach( (sentence: any) => {
-       console.log(`Sentence: ${sentence.text.content}`)
-       console.log(`  Score: ${sentence.sentiment.score}`)
-       console.log(`  Magnitude: ${sentence.sentiment.magnitude}`)
-   })
+   console.log(`Sentiment Score: ${sentiment.score}`)
+   console.log(`Sentiment Magnitude: ${sentiment.magnitude}`)
 
    return sentiment
 }
@@ -66,11 +58,14 @@ export async function refreshSourcesHelper() {
 export async function refreshHeadlinesHelper(date?: string) {
     try {
         // raw unformatted headlines
-        const resp: interfaces.rawHeadline[] = await helpers.getHeadlines();
+        const resp: interfaces.rawHeadline[] = await helpers.getHeadlines()
 
-        // minimized and aggregated headlines, grouped by source
-        const formattedResp: interfaces.groupedHeadline[] = helpers.formatHeadlines(resp);
+        // minimized headlines
+        const formattedResp: interfaces.formattedHeadline[] = helpers.formatHeadlines(resp)
 
+        // group headlines by source
+        const grouped: interfaces.groupedHeadline[] = helpers.groupHeadlines(formattedResp, 'source')
+    
         let datetime: string
         // if date is not provided, then it is an hourly scheduled refresh
         if (date === undefined) {
@@ -86,8 +81,10 @@ export async function refreshHeadlinesHelper(date?: string) {
 
         // upsert into headlines. This will create or overrite the document
         docRef.set({
-            ...formattedResp,
+            ...grouped,
         })
+
+        console.info(`refreshed headlines for ${datetime}`)
     } catch (error) {
         console.error('failed in refreshHeadlinesHelper')
         throw error

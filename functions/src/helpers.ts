@@ -9,7 +9,7 @@ axios.defaults.headers.get['X-Api-Key'] = functions.config().newsapi.key // set 
 import * as interfaces from './interfaces'
 
 // groupHeadlines is a helper function to group arrays by a provided key
-export function groupHeadlines(ungrouped: interfaces.formattedHeadline[], key: string) {
+export function groupHeadlines(ungrouped: interfaces.formattedHeadline[], key: string): interfaces.groupedHeadline[] {
     return ungrouped.reduce((grouped: any, each: any) => {
         (grouped[each[key]] = grouped[each[key]] || []).push({
             author: each.author || 'Anonymous', // if author is null, set as anonymous
@@ -64,7 +64,7 @@ export async function getHeadlines() {
 }
 
 // formatHeadlines filters and aggregates rawData into a storeable format
-export function formatHeadlines(headlines: interfaces.rawHeadline[]): interfaces.groupedHeadline[] {
+export function formatHeadlines(headlines: interfaces.rawHeadline[]): interfaces.formattedHeadline[] {
     const formatted: interfaces.formattedHeadline[] = headlines.map(headline => {
         return {
             source: headline.source.name, // format source to get string description
@@ -76,11 +76,7 @@ export function formatHeadlines(headlines: interfaces.rawHeadline[]): interfaces
             content: headline.content,
         }
     })
-
-    // group headlines by source
-    const grouped: interfaces.groupedHeadline[] = groupHeadlines(formatted, 'source')
-    
-    return grouped
+    return formatted
 }
 
 // formatSources filters sources and based on language and country
