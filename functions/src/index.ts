@@ -8,8 +8,10 @@ const db = admin.firestore() // Reference to our firestore database
 import * as interfaces from './interfaces'
 import * as helpers from './helpers'
 
-// Imports the Google Cloud client library for NLP
-import * as language from '@google-cloud/language'
+
+// Imports the Google Cloud client library
+const language = require('@google-cloud/language');
+
 // Creates a client
 const client = new language.LanguageServiceClient();
 
