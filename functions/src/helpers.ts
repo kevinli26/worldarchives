@@ -38,7 +38,7 @@ export async function getSources() {
             return response.sources
         }
     } catch (error) {
-        console.log('Failed in getSources')
+        console.error('Failed in getSources')
         throw error
     }
 }
@@ -58,7 +58,7 @@ export async function getHeadlines() {
             return response.articles
         }
     } catch (error) {
-        console.log('Failed in getHeadlines')
+        console.error('Failed in getHeadlines')
         throw error
     }
 }
