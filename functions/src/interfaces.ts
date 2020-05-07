@@ -16,7 +16,7 @@ export interface rawHeadline {
     content: string
 }
 
-export interface formattedHeadline {
+export interface analyzedHeadline {
     source: string
     author: string
     title: string
@@ -24,6 +24,8 @@ export interface formattedHeadline {
     urlToImage: string
     publishedAt: string
     content: string
+    sentimentScore: number
+    sentimentMagnitude: number
 }
 
 export interface minimizedHeadline {
@@ -32,6 +34,8 @@ export interface minimizedHeadline {
     urlToImage: string
     publishedAt: string
     content: string
+    sentimentScore: number
+    sentimentMagnitude: number
 }
 // the final form of headlines that the client side will subscribe to
 export interface groupedHeadline {

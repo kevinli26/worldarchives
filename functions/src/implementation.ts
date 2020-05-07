@@ -7,28 +7,6 @@ const db = admin.firestore() // Reference to our firestore database
 import * as interfaces from './interfaces'
 import * as helpers from './helpers'
 
-// Imports the Google Cloud client library
-const language = require('@google-cloud/language')
-const client = new language.LanguageServiceClient()
-
-// implements the functionality of the NLP sentiment analysis
-export async function sentimentAnalysis(text: string) {
-    // Prepares a document, representing the provided text
-    const document = {
-       content: text,
-       type: 'PLAIN_TEXT',
-   };
-
-   // Detects the sentiment of the document
-   const [result] = await client.analyzeSentiment({document})
-
-   const sentiment: any = result.documentSentiment
-   console.log(`Sentiment Score: ${sentiment.score}`)
-   console.log(`Sentiment Magnitude: ${sentiment.magnitude}`)
-
-   return sentiment
-}
-
 // implements the functionality of refreshing sources
 export async function refreshSourcesHelper() {
     try {
@@ -60,12 +38,12 @@ export async function refreshHeadlinesHelper(date?: string) {
         // raw unformatted headlines
         const resp: interfaces.rawHeadline[] = await helpers.getHeadlines()
 
-        // minimized headlines
-        const formattedResp: interfaces.formattedHeadline[] = helpers.formatHeadlines(resp)
+        // minimized headlines with applied NLP
+        const formattedResp: interfaces.analyzedHeadline[] = helpers.analyzeHeadlines(resp)
 
         // group headlines by source
         const grouped: interfaces.groupedHeadline[] = helpers.groupHeadlines(formattedResp, 'source')
-    
+
         let datetime: string
         // if date is not provided, then it is an hourly scheduled refresh
         if (date === undefined) {

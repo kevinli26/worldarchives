@@ -8,8 +8,32 @@ axios.defaults.headers.get['X-Api-Key'] = functions.config().newsapi.key // set 
 // import local files
 import * as interfaces from './interfaces'
 
+// Imports the Google Cloud client library for NLP
+const language = require('@google-cloud/language')
+const client = new language.LanguageServiceClient()
+
+
+// implements the functionality of the NLP sentiment analysis
+async function sentimentAnalysis(text: string) {
+    // Prepares a document, representing the provided text
+    const document = {
+       content: text,
+       type: 'PLAIN_TEXT',
+   };
+
+   // Detects the sentiment of the document
+   const [result] = await client.analyzeSentiment({document})
+
+   const sentiment: any = result.documentSentiment
+   console.log(`Sentiment Score: ${sentiment.score}`)
+   console.log(`Sentiment Magnitude: ${sentiment.magnitude}`)
+
+   return sentiment
+}
+
+
 // groupHeadlines is a helper function to group arrays by a provided key
-export function groupHeadlines(ungrouped: interfaces.formattedHeadline[], key: string): interfaces.groupedHeadline[] {
+export function groupHeadlines(ungrouped: interfaces.analyzedHeadline[], key: string): interfaces.groupedHeadline[] {
     return ungrouped.reduce((grouped: any, each: any) => {
         (grouped[each[key]] = grouped[each[key]] || []).push({
             author: each.author || 'Anonymous', // if author is null, set as anonymous
@@ -17,6 +41,8 @@ export function groupHeadlines(ungrouped: interfaces.formattedHeadline[], key: s
             urlToImage: each.urlToImage,
             publishedAt: each.publishedAt,
             content: each.content || each.description || "Not Available",
+            sentimentScore: each.sentimentScore,
+            sentimentMagnitude: each.sentimentMagnitude,
         });
         return grouped;
     }, {});
@@ -63,9 +89,9 @@ export async function getHeadlines() {
     }
 }
 
-// formatHeadlines filters and aggregates rawData into a storeable format
-export function formatHeadlines(headlines: interfaces.rawHeadline[]): interfaces.formattedHeadline[] {
-    const formatted: interfaces.formattedHeadline[] = headlines.map(headline => {
+// analyze headlines filters and aggregates rawData into a storeable format, then runs NLP apis on it
+export function analyzeHeadlines(headlines: interfaces.rawHeadline[]): interfaces.analyzedHeadline[] {
+    const formatted: interfaces.analyzedHeadline[] = headlines.map(headline => {
         return {
             source: headline.source.name, // format source to get string description
             author: headline.author,
@@ -74,6 +100,8 @@ export function formatHeadlines(headlines: interfaces.rawHeadline[]): interfaces
             urlToImage: headline.urlToImage,
             publishedAt: headline.publishedAt,
             content: headline.content,
+            sentimentScore: 10,
+            sentimentMagnitude: 10,
         }
     })
     return formatted

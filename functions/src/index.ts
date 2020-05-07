@@ -2,12 +2,6 @@
 import * as functions from 'firebase-functions' // The Cloud Functions for Firebase SDK to create Cloud Functions and setup triggers.
 import * as implementation from './implementation'
 
-exports.testSentimentAnalysis = functions.https.onRequest(async (req: any, res: any) => {
-    const text = 'CHICAGO (WLS) -- There are cases in Chicago of a mysterious illness impacting children that may be connected to COVID-19. The symptoms are very similar to toxic shock syndrome or Kawasaki disease, a rare sickness that involves inflammation of blood vessels.'
-    await implementation.sentimentAnalysis(text)
-    res.end()
-})
-
 
 // manual refresh method for news sources
 exports.refreshSources = functions.https.onRequest(async (req: any, res: any) => {
@@ -34,7 +28,7 @@ exports.refreshHeadlines = functions.https.onRequest(async (req: any, res: any) 
 })
 
 // scheduled pubsub job for refreshing news headlines
-exports.scheduledDataRefresh = functions.pubsub.schedule('every 60 minutes').onRun( async (context: any) => {
+exports.scheduledDataRefresh = functions.pubsub.schedule('every 12 hours').onRun( async (context: any) => {
     console.log('Refresh news sources first')
     try {
         await implementation.refreshSourcesHelper()
@@ -60,12 +54,12 @@ exports.scheduledDataRefresh = functions.pubsub.schedule('every 60 minutes').onR
 exports.refreshHeadlinesWithDate = functions.https.onRequest(async (req: any, res: any) => {
     try {
         // get passed in date from request
-        let documentDate: string = req.query.date
+        const documentDate: string = req.query.date
 
         // refresh headlines for the provided date
         await implementation.refreshHeadlinesHelper(documentDate)
         console.info(`SUCCESS: Manual headlines date update succeeded`)
-        
+
         res.end()
     } catch (error) {
         console.error(`FAILURE: Manual headlines date update failed with error: ${error.toString()}`)
