@@ -22,14 +22,13 @@ async function sentimentAnalysis(text: string) {
 
    // Analyzes and stores the sentiment of the document
    const [result] = await client.analyzeSentiment({document})
-
    const sentiment: any = result.documentSentiment
-//    console.log(`Sentiment Score: ${sentiment.score}`)
-//    console.log(`Sentiment Magnitude: ${sentiment.magnitude}`)
 
    return sentiment
 }
 
+// TO-DO: content classification
+// TO-DO: entity analysis
 
 // groupHeadlines is a helper function to group arrays by a provided key
 export function groupHeadlines(ungrouped: interfaces.analyzedHeadline[], key: string): interfaces.groupedHeadline[] {
@@ -42,10 +41,10 @@ export function groupHeadlines(ungrouped: interfaces.analyzedHeadline[], key: st
             content: each.content || each.description || "Not Available",
             sentimentScore: each.sentimentScore,
             sentimentMagnitude: each.sentimentMagnitude,
-        });
-        return grouped;
-    }, {});
-};
+        })
+        return grouped
+    }, {})
+}
 
 // getSources gets the list of sources
 export async function getSources() {
