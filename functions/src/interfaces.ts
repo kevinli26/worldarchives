@@ -16,6 +16,18 @@ export interface rawHeadline {
     content: string
 }
 
+// the format of the response received from classification content
+export interface NLPClassification {
+    confidence: number
+    name: string
+}
+
+// the format of the response received from sentiment analysis
+export interface NLPSentiment {
+    magnitude: number
+    score: number
+}
+
 export interface analyzedHeadline {
     source: string
     author: string
@@ -24,8 +36,8 @@ export interface analyzedHeadline {
     urlToImage: string
     publishedAt: string
     content: string
-    sentimentScore: number
-    sentimentMagnitude: number
+    sentiment: NLPSentiment
+    classification: NLPClassification[]
 }
 
 export interface minimizedHeadline {
@@ -34,9 +46,10 @@ export interface minimizedHeadline {
     urlToImage: string
     publishedAt: string
     content: string
-    sentimentScore: number
-    sentimentMagnitude: number
+    sentiment: NLPSentiment
+    classification: NLPClassification[]
 }
+
 // the final form of headlines that the client side will subscribe to
 export interface groupedHeadline {
     source: minimizedHeadline[]
