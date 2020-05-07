@@ -1,7 +1,7 @@
 /* HEADLINES */
 // intermediate interfaces to strictly type the transformation process
 export interface Source {
-    id: string;
+    id: string
     name: string
 }
 

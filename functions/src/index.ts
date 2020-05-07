@@ -2,7 +2,6 @@
 import * as functions from 'firebase-functions' // The Cloud Functions for Firebase SDK to create Cloud Functions and setup triggers.
 import * as implementation from './implementation'
 
-
 // manual refresh method for news sources
 exports.refreshSources = functions.https.onRequest(async (req: any, res: any) => {
     try {

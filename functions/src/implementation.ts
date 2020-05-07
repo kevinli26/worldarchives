@@ -11,10 +11,10 @@ import * as helpers from './helpers'
 export async function refreshSourcesHelper() {
     try {
         // raw unformatted sources
-        const resp: interfaces.rawSource[] = await helpers.getSources();
+        const resp: interfaces.rawSource[] = await helpers.getSources()
 
         // only return english sources in the us
-        const formattedResp: string[] = helpers.formatSources(resp);
+        const formattedResp: string[] = helpers.formatSources(resp)
 
         // only have one document that keeps track of the sources
         const docRef: any = db.collection('sources').doc('en')

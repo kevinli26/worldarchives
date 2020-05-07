@@ -1,35 +1,29 @@
 // firebase dependencies
 import * as functions from 'firebase-functions' // The Cloud Functions for Firebase SDK to create Cloud Functions and setup triggers.
+const language = require('@google-cloud/language') // Imports the Google Cloud client library
+const client = new language.LanguageServiceClient()
 
 // external dependencies
 const axios = require('axios').default
 axios.defaults.headers.get['X-Api-Key'] = functions.config().newsapi.key // set api key in header for all for all GET requests
-const language = require('@google-cloud/language') // Imports the Google Cloud client library for NLP
-const client = new language.LanguageServiceClient() // activates the client to provide an interface
 
 // import local files
 import * as interfaces from './interfaces'
 
-
-
-// implements the functionality of the NLP sentiment analysis
-async function sentimentAnalysis(text: string) {
-    // prepare a document to analyze
+// manual refresh method for news sources
+export async function testSentiment(text: string) {
+    // Prepares a document, representing the provided text
     const document = {
-       content: text,
-       type: 'PLAIN_TEXT',
+        content: text,
+        type: 'PLAIN_TEXT',
     }
-
-   // Analyzes and stores the sentiment of the document
-   const [result] = await client.analyzeSentiment({document})
-
-   const sentiment: any = result.documentSentiment
-//    console.log(`Sentiment Score: ${sentiment.score}`)
-//    console.log(`Sentiment Magnitude: ${sentiment.magnitude}`)
-
-   return sentiment
+    
+    // Analyze the sentiment of the document and store the result
+    const [result] = await client.analyzeSentiment({document})
+    
+    const sentiment: any = result.documentSentiment    
+    return sentiment
 }
-
 
 // groupHeadlines is a helper function to group arrays by a provided key
 export function groupHeadlines(ungrouped: interfaces.analyzedHeadline[], key: string): interfaces.groupedHeadline[] {
@@ -42,10 +36,10 @@ export function groupHeadlines(ungrouped: interfaces.analyzedHeadline[], key: st
             content: each.content || each.description || "Not Available",
             sentimentScore: each.sentimentScore,
             sentimentMagnitude: each.sentimentMagnitude,
-        });
-        return grouped;
-    }, {});
-};
+        })
+        return grouped
+    }, {})
+}
 
 // getSources gets the list of sources
 export async function getSources() {
@@ -91,7 +85,18 @@ export async function getHeadlines() {
 // analyze headlines filters and aggregates rawData into a storeable format, then runs NLP apis on it
 export async function analyzeHeadlines(headlines: interfaces.rawHeadline[]) {
     const formatted: interfaces.analyzedHeadline[] = await Promise.all(headlines.map(async headline => {
-        const sentimentResult: any = await sentimentAnalysis(headline.content)
+        let sentimentResult: any
+
+        // don't call API if we have a null content
+        if (headline.content === null || headline.content.length === 0) {
+            sentimentResult = {
+                score: 0,
+                magnitude: 0,
+            }
+        } else {
+            sentimentResult = await testSentiment(headline.content)
+        } 
+        
         return {
             source: headline.source.name, // format source to get string description
             author: headline.author,
