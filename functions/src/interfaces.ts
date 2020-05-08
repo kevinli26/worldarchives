@@ -1,7 +1,7 @@
 /* HEADLINES */
 // intermediate interfaces to strictly type the transformation process
 export interface Source {
-    id: string;
+    id: string
     name: string
 }
 
@@ -16,7 +16,19 @@ export interface rawHeadline {
     content: string
 }
 
-export interface formattedHeadline {
+// the format of the response received from classification content
+export interface NLPClassification {
+    confidence: number
+    name: string
+}
+
+// the format of the response received from sentiment analysis
+export interface NLPSentiment {
+    magnitude: number
+    score: number
+}
+
+export interface analyzedHeadline {
     source: string
     author: string
     title: string
@@ -24,6 +36,8 @@ export interface formattedHeadline {
     urlToImage: string
     publishedAt: string
     content: string
+    sentiment: NLPSentiment
+    classification: NLPClassification[]
 }
 
 export interface minimizedHeadline {
@@ -32,7 +46,10 @@ export interface minimizedHeadline {
     urlToImage: string
     publishedAt: string
     content: string
+    sentiment: NLPSentiment
+    classification: NLPClassification[]
 }
+
 // the final form of headlines that the client side will subscribe to
 export interface groupedHeadline {
     source: minimizedHeadline[]
