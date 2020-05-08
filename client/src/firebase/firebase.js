@@ -19,12 +19,6 @@ class Firebase {
     firebase.initializeApp(firebaseConfig);
     this.auth = firebase.auth();
     this.db = firebase.firestore();
-    // firebase.auth().onAuthStateChanged((user) => {
-    //   if (user) {
-    //     console.log("we gucci");
-    //   } else {
-    //   }
-    // });
   }
 
   getAllArticles = () => {

@@ -1,5 +1,5 @@
 import React, { useState, Component, useEffect } from "react";
-import "../css/Newsarchiver.css";
+import "../css/Worldarchiver.css";
 import { connect } from "react-redux";
 import Calendar from "../components/Calendar";
 import Button from "../components/Button";
@@ -77,10 +77,8 @@ function NewsArchiver(props) {
 
   async function onButtonPress() {
     setLoading(true);
-    // BIG QUERYING FUNCTION BOIS
     await queryDB();
     console.log(props.articles);
-    // END OF FAT QUERYING FUNCTION
     setLoading(false);
     setSelecting(false);
   }

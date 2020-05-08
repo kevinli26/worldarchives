@@ -5,7 +5,7 @@ import {
   Switch,
   Redirect,
 } from "react-router-dom";
-import NewsArchiver from "./Newsarchiver";
+import NewsArchiver from "./Worldarchiver";
 import { withFirebase } from "../firebase/index";
 import Login from "./Login";
 import { connect } from "react-redux";
