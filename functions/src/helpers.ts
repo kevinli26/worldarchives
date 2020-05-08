@@ -51,13 +51,21 @@ export async function analyzeEntity(text: string) {
     // Detect the entities of the document and store the result
     const [result] = await client.analyzeEntities({document})
     
-    // map the results to transform it into the desired shape
-    const entities: interfaces.NLPEntity[] = result.entities.map((entity: any) => {
+    // map the results to transform it into the desired shape first
+    let entities: interfaces.NLPEntity[] = result.entities.map((entity: any) => {
         return {
             type: entity.type,
             salience: entity.salience,
         }
-    })    
+    })
+
+    // finally, filter out undetermined values and those with 0 salience
+    entities = entities.filter((entity: interfaces.NLPEntity) => {
+        if (entity.salience === 0 || entity.type === 'OTHER' || entity.type === 'UNKNOWN') {
+            return false
+        }
+        return true
+    })
     return entities
 }
 
