@@ -1,5 +1,5 @@
 import React, { useState, Component, useEffect } from "react";
-import "../css/NewsArchiver.css";
+import "../css/Newsarchiver.css";
 import { connect } from "react-redux";
 import Calendar from "../components/Calendar";
 import Button from "../components/Button";
