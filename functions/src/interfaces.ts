@@ -28,6 +28,11 @@ export interface NLPSentiment {
     score: number
 }
 
+export interface NLPEntity {
+    type: string
+    salience: number
+}
+
 export interface analyzedHeadline {
     source: string
     author: string
@@ -37,7 +42,8 @@ export interface analyzedHeadline {
     publishedAt: string
     content: string
     sentiment: NLPSentiment
-    classification: NLPClassification[]
+    classifications: NLPClassification[]
+    entities: NLPEntity[]
 }
 
 export interface minimizedHeadline {
@@ -47,7 +53,8 @@ export interface minimizedHeadline {
     publishedAt: string
     content: string
     sentiment: NLPSentiment
-    classification: NLPClassification[]
+    classifications: NLPClassification[]
+    entities: NLPEntity[]
 }
 
 // the final form of headlines that the client side will subscribe to

@@ -21,7 +21,7 @@ export async function analyzeSentiment(text: string) {
     // Analyze the sentiment of the document and store the result
     const [result] = await client.analyzeSentiment({document})
     
-    const sentiment: interfaces.NLPSentiment = result.documentSentiment    
+    const sentiment: interfaces.NLPSentiment = result.documentSentiment  
     return sentiment
 }
 
@@ -40,6 +40,27 @@ export async function classifyContent(text: string) {
     return categories
 }
 
+// implements the entity anlyzation of headline content
+export async function analyzeEntity(text: string) {
+    // Prepares a document, representing the provided text
+    const document = {
+        content: text,
+        type: 'PLAIN_TEXT',
+    }
+    
+    // Detect the entities of the document and store the result
+    const [result] = await client.analyzeEntities({document})
+    
+    // map the results to transform it into the desired shape
+    const entities: interfaces.NLPEntity[] = result.entities.map((entity: any) => {
+        return {
+            type: entity.type,
+            salience: entity.salience,
+        }
+    })    
+    return entities
+}
+
 // groupHeadlines is a helper function to group arrays by a provided key
 export function groupHeadlines(ungrouped: interfaces.analyzedHeadline[], key: string): interfaces.groupedHeadline[] {
     return ungrouped.reduce((grouped: any, each: any) => {
@@ -50,7 +71,8 @@ export function groupHeadlines(ungrouped: interfaces.analyzedHeadline[], key: st
             publishedAt: each.publishedAt,
             content: each.content || each.description || "Not Available",
             sentiment: each.sentiment,
-            classification: each.classification,
+            classifications: each.classifications,
+            entities: each.entities,
         })
         return grouped
     }, {})
@@ -102,7 +124,8 @@ export async function analyzeHeadlines(headlines: interfaces.rawHeadline[]) {
     const formatted: interfaces.analyzedHeadline[] = await Promise.all(headlines.map(async headline => {
         // lazy variables to store the content of the NLP api response (or mocked data if the content is null)
         let sentimentResult: interfaces.NLPSentiment
-        let classificationResult: interfaces.NLPClassification[]
+        let classificationResults: interfaces.NLPClassification[]
+        let entityResults: interfaces.NLPEntity[]
 
         // don't call NLP api if we have null content, instead provided mocked results to represent null results
         if (headline.content === null || headline.content.length === 0) {
@@ -110,10 +133,12 @@ export async function analyzeHeadlines(headlines: interfaces.rawHeadline[]) {
                 score: 0,
                 magnitude: 0,
             }
-            classificationResult = []
+            classificationResults = []
+            entityResults = []
         } else {
             sentimentResult = await analyzeSentiment(headline.content)
-            classificationResult = await classifyContent(headline.content)
+            classificationResults = await classifyContent(headline.content)
+            entityResults = await analyzeEntity(headline.content)
         } 
         
         return {
@@ -125,7 +150,8 @@ export async function analyzeHeadlines(headlines: interfaces.rawHeadline[]) {
             publishedAt: headline.publishedAt,
             content: headline.content,
             sentiment: sentimentResult,
-            classification: classificationResult,
+            classifications: classificationResults,
+            entities: entityResults,
         }
     }))
     return formatted
