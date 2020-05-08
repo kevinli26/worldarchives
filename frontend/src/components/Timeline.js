@@ -28,6 +28,10 @@ function Timeline({ articles }) {
                 "dddd, MMMM Do YYYY, h:mm:ss a"
               )}
               iconStyle={{ background: "#1D3557", color: "#fff" }}
+              iconOnClick={() => {
+                document.getElementById(`${article.title}`).style.display =
+                  "block";
+              }}
             >
               <h3
                 style={{
@@ -46,7 +50,14 @@ function Timeline({ articles }) {
                 height="200px"
                 src={article.urlToImage}
               />
-              <p>{article.content}</p>
+              <p
+                id={article.title}
+                style={{
+                  display: "none",
+                }}
+              >
+                {article.content}
+              </p>
             </VerticalTimelineElement>
           );
         })}

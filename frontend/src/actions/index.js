@@ -5,6 +5,7 @@ import {
   SET_SOURCES,
   SET_SELECTED_SOURCES,
   SET_AUTHENTICATED,
+  CLEAR_ARTICLES,
 } from "../constants/action-types";
 
 export function addArticle(payload) {
@@ -29,4 +30,8 @@ export function setSelectedSources(payload) {
 
 export function setAuthenticated(payload) {
   return { type: SET_AUTHENTICATED, payload };
+}
+
+export function clearArticles(payload) {
+  return { type: CLEAR_ARTICLES, payload };
 }

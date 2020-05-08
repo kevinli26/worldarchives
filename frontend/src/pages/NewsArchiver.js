@@ -3,7 +3,7 @@ import "../css/NewsArchiver.css";
 import { connect } from "react-redux";
 import Calendar from "../components/Calendar";
 import Button from "../components/Button";
-import { setSources, addArticle } from "../actions/index";
+import { setSources, addArticle, clearArticles } from "../actions/index";
 import CheckboxGroup from "react-checkbox-group";
 import Loader from "../components/Loader";
 import { isThisWeek, addDays } from "date-fns";
@@ -47,6 +47,7 @@ function NewsArchiver(props) {
   }
 
   async function queryDB() {
+    props.dispatch(clearArticles());
     var cDate = props.startDate;
     var eDate = props.endDate;
     while (cDate <= eDate) {
@@ -57,7 +58,6 @@ function NewsArchiver(props) {
         .get()
         .then((snapshot) => {
           if (snapshot.empty) {
-            console.log("nothing");
           }
           snapshot.forEach((doc) => {
             const data = doc.data();
@@ -79,6 +79,7 @@ function NewsArchiver(props) {
     setLoading(true);
     // BIG QUERYING FUNCTION BOIS
     await queryDB();
+    console.log(props.articles);
     // END OF FAT QUERYING FUNCTION
     setLoading(false);
     setSelecting(false);
