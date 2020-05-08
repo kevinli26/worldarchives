@@ -16,6 +16,8 @@ jobs:
 
     - name: Build
       run: |
+        npm cache clean --force
+        rm -rf node_modules package-lock.json
         npm install
         npm run-script build
       working-directory: ${{env.working-directory}}
