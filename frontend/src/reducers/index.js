@@ -5,6 +5,7 @@ import {
   SET_SOURCES,
   SET_SELECTED_SOURCES,
   SET_AUTHENTICATED,
+  CLEAR_ARTICLES,
 } from "../constants/action-types";
 
 const initialState = {
@@ -43,6 +44,11 @@ function rootReducer(state = initialState, action) {
     return {
       ...state,
       isAuthenticated: action.payload,
+    };
+  } else if (action.type === CLEAR_ARTICLES) {
+    return {
+      ...state,
+      articles: [],
     };
   }
   return state;
