@@ -28,7 +28,7 @@ exports.refreshHeadlines = functions.https.onRequest(async (req: any, res: any) 
 
 // scheduled pubsub job for refreshing news headlines
 // 5000 requests per month = 160 request per day =  6 requests per hour
-exports.scheduledDataRefresh = functions.pubsub.schedule('every 6 hours').onRun( async (context: any) => {
+exports.scheduledDataRefresh = functions.pubsub.schedule('every 60 minutes').onRun( async (context: any) => {
     console.log('Refresh news sources first')
     try {
         await implementation.refreshSourcesHelper()
