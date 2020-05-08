@@ -14,13 +14,13 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v2
+      with:
+          persist-credentials: false
 
     - name: Build
       run: |
-        npm cache clean --force
-        rm -rf node_modules package-lock.json
         npm install
-        npm run-script build
+        npm run build
       working-directory: ${{env.working-directory}}
       env:
         REACT_APP_API_KEY: ${{ secrets.REACT_APP_API_KEY }}
@@ -32,8 +32,8 @@ jobs:
         REACT_APP_APP_ID: ${{ secrets.REACT_APP_APP_ID }}
 
     - name: Deploy
-      uses: crazy-max/ghaction-github-pages@v1.5.1
+      uses: JamesIves/github-pages-deploy-action@releases/v3
       with:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN_KEY }}
         BRANCH: gh-pages
-        FOLDER: dist
+        FOLDER: build
