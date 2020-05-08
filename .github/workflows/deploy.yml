@@ -12,7 +12,7 @@ jobs:
       working-directory: ./frontend
     steps:
     - name: Checkout
-      uses: actions/checkout@v1
+      uses: actions/checkout@v2
 
     - name: Build
       run: |
@@ -21,7 +21,7 @@ jobs:
       working-directory: ${{env.working-directory}}
       env:
         REACT_APP_API_KEY: ${{ secrets.REACT_APP_API_KEY }}
-        REACT_APP_REACT_APP_AUTH_DOMAIN: ${{ secrets.REACT_APP_REACT_APP_AUTH_DOMAIN }}
+        REACT_APP_AUTH_DOMAIN: ${{ secrets.REACT_APP_AUTH_DOMAIN }}
         REACT_APP_DATABASE_URL: ${{ secrets.REACT_APP_DATABASE_URL }}
         REACT_APP_PROJECT_ID: ${{ secrets.REACT_APP_PROJECT_ID }}
         REACT_APP_STORAGE_BUCKET: ${{ secrets.REACT_APP_STORAGE_BUCKET }}
@@ -29,7 +29,7 @@ jobs:
         REACT_APP_APP_ID: ${{ secrets.REACT_APP_APP_ID }}
 
     - name: Deploy
-      uses: JamesIves/github-pages-deploy-action@releases/v3
+      uses: crazy-max/ghaction-github-pages@v1.5.1
       with:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN_KEY }}
         BRANCH: gh-pages
