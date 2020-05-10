@@ -15,3 +15,9 @@ Future ideas:
 - Dockerize and deploy on AWS or GCP
 - Save user preferences and account info to provide a customized experience
 - Add email-based subscription service to email weekly/monthly summaries with Sendgrid
+
+
+To start the application, in the client folder, run:
+1. npm install
+2. npm start
+3. Runs the app in the development mode. Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
