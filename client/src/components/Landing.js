@@ -1,10 +1,12 @@
 import React from "react";
 import "../css/Landingbutton.css";
 import { Link } from "react-router-dom";
+import "../css/Landing.css";
 
 const Landing = () => {
   return (
     <div
+      id="landing"
       style={{
         backgroundColor: "#293241",
         color: "#E0FBFC",
