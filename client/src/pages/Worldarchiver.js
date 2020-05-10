@@ -9,6 +9,7 @@ import Loader from "../components/Loader";
 import { isThisWeek, addDays } from "date-fns";
 import { firestore } from "firebase";
 import Timeline from "../components/Timeline";
+import Collapsible from "react-collapsible";
 
 const mapStateToProps = (state, ownProps) => {
   return {
@@ -23,8 +24,24 @@ const mapStateToProps = (state, ownProps) => {
 
 function NewsArchiver(props) {
   const [selectedSources, setSelectedSources] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selecting, setSelecting] = useState(true);
+
+  async function filterSources(sources) {
+    // sources = {name, category, url}
+    var sourcesToStore = {};
+    sources.map(async (s) => {
+      if (sourcesToStore[s.category] == null) {
+        sourcesToStore[s.category] = [s.name];
+        setCategories(categories.push(s.category));
+      } else {
+        sourcesToStore[s.category].push(s.name);
+      }
+    });
+    return sourcesToStore;
+    // setLoading(false);
+  }
 
   useEffect(() => {
     if (props.firebase != null) {
@@ -34,7 +51,8 @@ function NewsArchiver(props) {
           .doc("en")
           .get();
         if (doc.exists) {
-          props.dispatch(setSources(doc.data().sources));
+          var sourcesToStore = await filterSources(doc.data().sources);
+          props.dispatch(setSources(sourcesToStore));
           setLoading(false);
         }
       }
@@ -78,7 +96,7 @@ function NewsArchiver(props) {
   async function onButtonPress() {
     setLoading(true);
     await queryDB();
-    console.log(props.articles);
+    // console.log(props.articles);
     setLoading(false);
     setSelecting(false);
   }
@@ -107,13 +125,20 @@ function NewsArchiver(props) {
               flexDirection: "row",
             }}
           >
-            <Calendar
-              dispatch={props.dispatch}
-              startDate={props.startDate}
-              endDate={props.endDate}
-              calKey={props.calKey}
-            />
             <div
+              style={{
+                flex: "1",
+              }}
+            >
+              <Calendar
+                dispatch={props.dispatch}
+                startDate={props.startDate}
+                endDate={props.endDate}
+                calKey={props.calKey}
+              />
+            </div>
+            <div
+              id="cbg"
               style={{
                 maxWidth: "30vw",
                 maxHeight: "50vh",
@@ -121,7 +146,7 @@ function NewsArchiver(props) {
               }}
             >
               <CheckboxGroup
-                name="fruits"
+                name="sources"
                 value={selectedSources}
                 onChange={setSelectedSources}
               >
@@ -130,13 +155,41 @@ function NewsArchiver(props) {
                     style={{
                       display: "flex",
                       flexDirection: "column",
-                      maxHeight: "30vh",
+                      maxHeight: "400px",
+                      marginLeft: "5px",
+                      marginRight: "5px",
                     }}
                   >
-                    {props.sources.map((name) => (
-                      <label style={{}}>
-                        <Checkbox value={name} /> {name}
-                      </label>
+                    {/* <label style={{}}>
+                      <Checkbox value={"select all"} /> {"Select All"}
+                    </label> */}
+                    {Object.keys(props.sources).map((key, index) => (
+                      <Collapsible
+                        triggerClassName="CollapsibleHeader"
+                        triggerOpenedClassName="CollapsibleHeader"
+                        trigger={key.toUpperCase()}
+                      >
+                        <div
+                          style={{
+                            flex: "1",
+                            paddingBottom: "10px",
+                          }}
+                        >
+                          <div
+                            style={{
+                              marginLeft: "20px",
+                              display: "flex",
+                              flexDirection: "column",
+                            }}
+                          >
+                            {props.sources[key].map((name) => (
+                              <label style={{}}>
+                                <Checkbox value={name} /> {name}
+                              </label>
+                            ))}
+                          </div>
+                        </div>
+                      </Collapsible>
                     ))}
                   </div>
                 )}
