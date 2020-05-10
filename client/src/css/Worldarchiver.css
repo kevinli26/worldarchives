@@ -2,3 +2,20 @@ body {
   margin: 0;
   max-width: 100%;
 }
+
+.CollapsibleHeader {
+  width: 100%;
+  display: inline-block;
+  overflow: hidden;
+  height: 100%;
+  padding: 12px;
+  background-color: #1d3557;
+}
+
+/* #cbg {
+  -ms-overflow-style: none;
+}
+
+#cbg::-webkit-scrollbar {
+  display: none;
+} */

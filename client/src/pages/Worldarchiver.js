@@ -6,9 +6,10 @@ import Button from "../components/Button";
 import { setSources, addArticle, clearArticles } from "../actions/index";
 import CheckboxGroup from "react-checkbox-group";
 import Loader from "../components/Loader";
-import { isThisWeek, addDays } from "date-fns";
+import { isThisWeek, addDays, subDays } from "date-fns";
 import { firestore } from "firebase";
 import Timeline from "../components/Timeline";
+import Collapsible from "react-collapsible";
 
 const mapStateToProps = (state, ownProps) => {
   return {
@@ -23,23 +24,43 @@ const mapStateToProps = (state, ownProps) => {
 
 function NewsArchiver(props) {
   const [selectedSources, setSelectedSources] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selecting, setSelecting] = useState(true);
 
+  async function filterSources(sources) {
+    // sources = {name, category, url}
+    var sourcesToStore = {};
+    sources.map(async (s) => {
+      if (sourcesToStore[s.category] == null) {
+        sourcesToStore[s.category] = [s.name];
+        setCategories(categories.push(s.category));
+      } else {
+        sourcesToStore[s.category].push(s.name);
+      }
+    });
+    return sourcesToStore;
+    // setLoading(false);
+  }
+
+  // should look to optimize no?
   useEffect(() => {
-    if (props.firebase != null) {
-      async function fetchSources() {
+    async function fetchSources() {
+      if (props.firebase != null && !Object.keys(props.sources).length) {
         const doc = await props.firebase.db
           .collection("sources")
           .doc("en")
           .get();
         if (doc.exists) {
-          props.dispatch(setSources(doc.data().sources));
-          setLoading(false);
+          var sourcesToStore = await filterSources(doc.data().sources);
+          props.dispatch(setSources(sourcesToStore));
         }
+        setLoading(false);
+      } else {
+        setLoading(false);
       }
-      fetchSources();
     }
+    fetchSources();
   }, [props.firebase]);
 
   function timeout(ms) {
@@ -48,9 +69,9 @@ function NewsArchiver(props) {
 
   async function queryDB() {
     props.dispatch(clearArticles());
-    var cDate = props.startDate;
-    var eDate = props.endDate;
-    while (cDate <= eDate) {
+    var cDate = props.endDate;
+    var eDate = props.startDate;
+    while (cDate >= eDate) {
       var date = cDate.toISOString().split("T")[0];
       await props.firebase.db
         .collection("headlines")
@@ -71,14 +92,14 @@ function NewsArchiver(props) {
             });
           });
         });
-      cDate = addDays(cDate, 1);
+      cDate = subDays(cDate, 1);
     }
   }
 
   async function onButtonPress() {
     setLoading(true);
     await queryDB();
-    console.log(props.articles);
+    // console.log(props.articles);
     setLoading(false);
     setSelecting(false);
   }
@@ -107,13 +128,20 @@ function NewsArchiver(props) {
               flexDirection: "row",
             }}
           >
-            <Calendar
-              dispatch={props.dispatch}
-              startDate={props.startDate}
-              endDate={props.endDate}
-              calKey={props.calKey}
-            />
             <div
+              style={{
+                flex: "1",
+              }}
+            >
+              <Calendar
+                dispatch={props.dispatch}
+                startDate={props.startDate}
+                endDate={props.endDate}
+                calKey={props.calKey}
+              />
+            </div>
+            <div
+              id="cbg"
               style={{
                 maxWidth: "30vw",
                 maxHeight: "50vh",
@@ -121,7 +149,7 @@ function NewsArchiver(props) {
               }}
             >
               <CheckboxGroup
-                name="fruits"
+                name="sources"
                 value={selectedSources}
                 onChange={setSelectedSources}
               >
@@ -130,13 +158,41 @@ function NewsArchiver(props) {
                     style={{
                       display: "flex",
                       flexDirection: "column",
-                      maxHeight: "30vh",
+                      maxHeight: "400px",
+                      marginLeft: "5px",
+                      marginRight: "5px",
                     }}
                   >
-                    {props.sources.map((name) => (
-                      <label style={{}}>
-                        <Checkbox value={name} /> {name}
-                      </label>
+                    {/* <label style={{}}>
+                      <Checkbox value={"select all"} /> {"Select All"}
+                    </label> */}
+                    {Object.keys(props.sources).map((key, index) => (
+                      <Collapsible
+                        triggerClassName="CollapsibleHeader"
+                        triggerOpenedClassName="CollapsibleHeader"
+                        trigger={key.toUpperCase()}
+                      >
+                        <div
+                          style={{
+                            flex: "1",
+                            paddingBottom: "10px",
+                          }}
+                        >
+                          <div
+                            style={{
+                              marginLeft: "20px",
+                              display: "flex",
+                              flexDirection: "column",
+                            }}
+                          >
+                            {props.sources[key].map((name) => (
+                              <label style={{}}>
+                                <Checkbox value={name} /> {name}
+                              </label>
+                            ))}
+                          </div>
+                        </div>
+                      </Collapsible>
                     ))}
                   </div>
                 )}
@@ -152,7 +208,7 @@ function NewsArchiver(props) {
           />
         </div>
       ) : (
-        <Timeline articles={props.articles} />
+        <Timeline articles={props.articles} setSelecting={setSelecting} />
       )}
     </div>
   );
