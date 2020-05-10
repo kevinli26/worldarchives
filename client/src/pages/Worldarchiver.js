@@ -6,7 +6,7 @@ import Button from "../components/Button";
 import { setSources, addArticle, clearArticles } from "../actions/index";
 import CheckboxGroup from "react-checkbox-group";
 import Loader from "../components/Loader";
-import { isThisWeek, addDays } from "date-fns";
+import { isThisWeek, addDays, subDays } from "date-fns";
 import { firestore } from "firebase";
 import Timeline from "../components/Timeline";
 import Collapsible from "react-collapsible";
@@ -43,9 +43,10 @@ function NewsArchiver(props) {
     // setLoading(false);
   }
 
+  // should look to optimize no?
   useEffect(() => {
-    if (props.firebase != null) {
-      async function fetchSources() {
+    async function fetchSources() {
+      if (props.firebase != null && !Object.keys(props.sources).length) {
         const doc = await props.firebase.db
           .collection("sources")
           .doc("en")
@@ -53,11 +54,13 @@ function NewsArchiver(props) {
         if (doc.exists) {
           var sourcesToStore = await filterSources(doc.data().sources);
           props.dispatch(setSources(sourcesToStore));
-          setLoading(false);
         }
+        setLoading(false);
+      } else {
+        setLoading(false);
       }
-      fetchSources();
     }
+    fetchSources();
   }, [props.firebase]);
 
   function timeout(ms) {
@@ -66,9 +69,9 @@ function NewsArchiver(props) {
 
   async function queryDB() {
     props.dispatch(clearArticles());
-    var cDate = props.startDate;
-    var eDate = props.endDate;
-    while (cDate <= eDate) {
+    var cDate = props.endDate;
+    var eDate = props.startDate;
+    while (cDate >= eDate) {
       var date = cDate.toISOString().split("T")[0];
       await props.firebase.db
         .collection("headlines")
@@ -89,7 +92,7 @@ function NewsArchiver(props) {
             });
           });
         });
-      cDate = addDays(cDate, 1);
+      cDate = subDays(cDate, 1);
     }
   }
 
@@ -205,7 +208,7 @@ function NewsArchiver(props) {
           />
         </div>
       ) : (
-        <Timeline articles={props.articles} />
+        <Timeline articles={props.articles} setSelecting={setSelecting} />
       )}
     </div>
   );
