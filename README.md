@@ -5,9 +5,9 @@ Project diagram:
 
 Project structure:
 - Scheduled pub/sub cloud functions with Firebase that saves the latest headlines every hour into Firestore
-- Client side react SPA that subscribes to headlines from custom date ranges and news sources. Listens to changes in to the DB in realtime, updating the client view on any new headlines
+- Client side react SPA that subscribes to headlines from custom date ranges and news sources. Listens to DB changes in realtime, updating the client view on any new headlines
 - Local session-based caching to save authentication state
-- Integrated NLP through GCP. Provides sentiment analysis, entity analysis, and content classification on news headlines.
+- Integrated NLP through GCP. Seamless support and transformation of sentiment analysis, entity analysis, and content classification data
 - OAuth and Guest login in with Firebase
 
 Future ideas:
